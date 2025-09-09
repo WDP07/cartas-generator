@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Cartas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eceff1;
+      text-align: center;
+      padding: 20px;
+    }
+    .carta {
+      width: 250px;
+      height: 350px;
+      background: white;
+      border: 3px solid black;
+      border-radius: 15px;
+      margin: 10px auto;
+      padding: 10px;
+      box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+    }
+    .rareza-comun { border-color: gray; }
+    .rareza-rara { border-color: blue; }
+    .rareza-legendaria { border-color: gold; }
+    .nombre { font-size: 20px; font-weight: bold; margin: 5px; }
+    .tipo { font-size: 14px; margin: 5px; }
+    .stats { margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>🎴 Generador de Cartas</h1>
+  <button onclick="generarCarta()">Generar Carta</button>
+  <button onclick="generarPaquete()">Generar Paquete (5 cartas)</button>
+  <div id="cartas"></div>
+
+  <script>
+    const nombres = ["Dracofire", "Aqualith", "Terranox", "Voltix", "Mystara"];
+    const tipos = ["Fuego", "Agua", "Tierra", "Eléctrico", "Místico"];
+    const rarezas = ["comun", "rara", "legendaria"];
+
+    function generarCarta() {
+      const nombre = nombres[Math.floor(Math.random() * nombres.length)];
+      const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+      const rareza = rarezas[Math.floor(Math.random() * rarezas.length)];
+      const ataque = Math.floor(Math.random() * 100);
+      const defensa = Math.floor(Math.random() * 100);
+
+      const carta = document.createElement("div");
+      carta.className = `carta rareza-${rareza}`;
+      carta.innerHTML = `
+        <div class="nombre">${nombre}</div>
+        <div class="tipo">Tipo: ${tipo}</div>
+        <div class="tipo">Rareza: ${rareza}</div>
+        <div class="stats">
+          <p>⚔️ Ataque: ${ataque}</p>
+          <p>🛡️ Defensa: ${defensa}</p>
+        </div>
+      `;
+
+      document.getElementById("cartas").appendChild(carta);
+    }
+
+    function generarPaquete() {
+      document.getElementById("cartas").innerHTML = "";
+      for (let i = 0; i < 5; i++) {
+        generarCarta();
+      }
+    }
+  </script>
+</body>
+</html>
