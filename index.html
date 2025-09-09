@@ -1,72 +1,680 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Generador de Cartas</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eceff1;
-      text-align: center;
-      padding: 20px;
-    }
-    .carta {
-      width: 250px;
-      height: 350px;
-      background: white;
-      border: 3px solid black;
-      border-radius: 15px;
-      margin: 10px auto;
-      padding: 10px;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
-    }
-    .rareza-comun { border-color: gray; }
-    .rareza-rara { border-color: blue; }
-    .rareza-legendaria { border-color: gold; }
-    .nombre { font-size: 20px; font-weight: bold; margin: 5px; }
-    .tipo { font-size: 14px; margin: 5px; }
-    .stats { margin-top: 15px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Generador de Cartas y Equipo – v1.5</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111827; --muted:#6b7280; --text:#e5e7eb; --accent:#22d3ee; --ok:#34d399; --warn:#f59e0b; --bad:#ef4444;
+    --card:#1f2937; --chip:#374151;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:16px 20px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0}
+  header .tag{background:var(--chip);padding:4px 10px;border-radius:999px;font-size:12px;color:#cbd5e1}
+  main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px}
+  @media (max-width: 980px){ main{grid-template-columns:1fr} }
+  .card{background:var(--panel);border:1px solid #1f2937;border-radius:16px}
+  .card .head{padding:14px 16px;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center}
+  .card .head h2{margin:0;font-size:16px}
+  .card .body{padding:14px 16px}
+  .grid{display:grid;gap:10px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+  label{font-size:12px;color:#cbd5e1;display:block;margin-bottom:4px}
+  input, select, textarea{
+    width:100%; background:#0b1220; color:var(--text); border:1px solid #1f2937; border-radius:10px; padding:10px; font-size:14px;
+  }
+  textarea{min-height:84px;resize:vertical}
+  button{
+    background:var(--accent); color:#0b1220; border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer
+  }
+  button.ghost{background:#0b1220;color:#cbd5e1;border:1px solid #1f2937}
+  button.danger{background:var(--bad);color:white}
+  button.secondary{background:#14b8a6;color:#052e2b}
+  .list{display:grid;gap:10px}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .divider{height:1px;background:#1f2937;margin:12px 0}
+  .badge{font-size:11px;padding:4px 8px;border-radius:999px;background:#0b1220;border:1px solid #1f2937;color:#cbd5e1}
+  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpi .box{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:12px}
+  .kpi .box .n{font-size:20px;font-weight:700}
+  .scroll{max-height:340px;overflow:auto}
+  .team-slot{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center}
+  .card-mini{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:8px}
+  .muted{color:var(--muted)}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .small{font-size:12px}
+  .code{background:#0b1220;border:1px dashed #1f2937;border-radius:12px;padding:12px;white-space:pre-wrap}
+</style>
 </head>
 <body>
-  <h1>🎴 Generador de Cartas</h1>
-  <button onclick="generarCarta()">Generar Carta</button>
-  <button onclick="generarPaquete()">Generar Paquete (5 cartas)</button>
-  <div id="cartas"></div>
+<header>
+  <h1>⚽ Generador de Cartas & Setup de Partido</h1>
+  <span class="tag">v1.5 – editor + equipo + modificadores</span>
+</header>
 
-  <script>
-    const nombres = ["Dracofire", "Aqualith", "Terranox", "Voltix", "Mystara"];
-    const tipos = ["Fuego", "Agua", "Tierra", "Eléctrico", "Místico"];
-    const rarezas = ["comun", "rara", "legendaria"];
-
-    function generarCarta() {
-      const nombre = nombres[Math.floor(Math.random() * nombres.length)];
-      const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-      const rareza = rarezas[Math.floor(Math.random() * rarezas.length)];
-      const ataque = Math.floor(Math.random() * 100);
-      const defensa = Math.floor(Math.random() * 100);
-
-      const carta = document.createElement("div");
-      carta.className = `carta rareza-${rareza}`;
-      carta.innerHTML = `
-        <div class="nombre">${nombre}</div>
-        <div class="tipo">Tipo: ${tipo}</div>
-        <div class="tipo">Rareza: ${rareza}</div>
-        <div class="stats">
-          <p>⚔️ Ataque: ${ataque}</p>
-          <p>🛡️ Defensa: ${defensa}</p>
+<main>
+  <!-- Columna izquierda: Editor de cartas -->
+  <section class="card">
+    <div class="head">
+      <h2>🧩 Crear carta</h2>
+      <div class="row">
+        <button class="ghost" id="btnExport">Exportar JSON</button>
+        <label class="pill">
+          Importar JSON <input type="file" id="fileImport" accept=".json" style="display:none"/>
+        </label>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid">
+        <div>
+          <label>Nombre</label>
+          <input id="c_name" placeholder="Ej: Muralla Áurea"/>
         </div>
-      `;
+        <div>
+          <label>Rol</label>
+          <select id="c_role">
+            <option value="GK">GK (Arquero)</option>
+            <option value="DEF">DEF (Defensa)</option>
+            <option value="MED">MED (Mediocampo)</option>
+            <option value="DC">DC (Delantero)</option>
+            <option value="SEC">Secundaria</option>
+          </select>
+        </div>
+      </div>
 
-      document.getElementById("cartas").appendChild(carta);
-    }
+      <div class="grid cols-3">
+        <div>
+          <label>ATA</label>
+          <input id="c_atk" type="number" min="0" max="200" value="60"/>
+        </div>
+        <div>
+          <label>DEF</label>
+          <input id="c_def" type="number" min="0" max="200" value="60"/>
+        </div>
+        <div>
+          <label>Energía Base</label>
+          <input id="c_energy" type="number" min="0" max="100" value="50"/>
+        </div>
+      </div>
 
-    function generarPaquete() {
-      document.getElementById("cartas").innerHTML = "";
-      for (let i = 0; i < 5; i++) {
-        generarCarta();
-      }
+      <div class="grid cols-3">
+        <div>
+          <label>Rareza</label>
+          <select id="c_rarity">
+            <option>común</option>
+            <option>rara</option>
+            <option>legendaria</option>
+          </select>
+        </div>
+        <div>
+          <label>Costo</label>
+          <input id="c_cost" type="number" min="0" value="0"/>
+        </div>
+        <div>
+          <label>ID (auto)</label>
+          <input id="c_id" disabled placeholder="Se genera al guardar"/>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Notas (opcional)</label>
+          <textarea id="c_notes" placeholder="Habilidad, condiciones especiales..."></textarea>
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <div class="muted small">Consejo: crea al menos 1 GK, 1 DEF, 1 MED, 1 DC y varias SEC.</div>
+        <div class="row">
+          <button id="btnSave">Guardar carta</button>
+          <button class="ghost" id="btnResetForm">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:0 0 8px 0;">📚 Tus cartas</h3>
+      <div id="cardsList" class="scroll list"></div>
+    </div>
+  </section>
+
+  <!-- Columna derecha: Equipo, Partido y Resultados -->
+  <section class="card">
+    <div class="head">
+      <h2>🏟️ Equipo & Partido</h2>
+      <span class="badge">Regla: 4 básicas (GK/DEF/MED/DC) + 2 secundarias</span>
+    </div>
+    <div class="body">
+      <div class="grid cols-2">
+        <div class="card-mini">
+          <div class="small muted">Selecciona tus cartas:</div>
+          <div class="grid">
+            <div class="team-slot">
+              <label>GK</label>
+              <select id="selGK"></select>
+              <button class="ghost" data-clear="selGK">Quitar</button>
+            </div>
+            <div class="team-slot">
+              <label>DEF</label>
+              <select id="selDEF"></select>
+              <button class="ghost" data-clear="selDEF">Quitar</button>
+            </div>
+            <div class="team-slot">
+              <label>MED</label>
+              <select id="selMED"></select>
+              <button class="ghost" data-clear="selMED">Quitar</button>
+            </div>
+            <div class="team-slot">
+              <label>DC</label>
+              <select id="selDC"></select>
+              <button class="ghost" data-clear="selDC">Quitar</button>
+            </div>
+            <div class="team-slot">
+              <label>SEC #1</label>
+              <select id="selSEC1"></select>
+              <button class="ghost" data-clear="selSEC1">Quitar</button>
+            </div>
+            <div class="team-slot">
+              <label>SEC #2</label>
+              <select id="selSEC2"></select>
+              <button class="ghost" data-clear="selSEC2">Quitar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-mini">
+          <div class="small muted">Parámetros del partido:</div>
+          <div class="grid">
+            <div class="grid cols-2">
+              <div>
+                <label>Estrategia</label>
+                <select id="matchStrategy">
+                  <option value="balance">Equilibrada</option>
+                  <option value="attack">Ofensiva</option>
+                  <option value="defense">Defensiva</option>
+                  <option value="counter">Contraataque</option>
+                </select>
+              </div>
+              <div>
+                <label>Estadio</label>
+                <select id="matchStadium">
+                  <option value="local">Local</option>
+                  <option value="neutral">Neutral</option>
+                  <option value="visitante">Visitante</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid cols-3">
+              <div>
+                <label>Clima</label>
+                <select id="matchWeather">
+                  <option value="soleado">Soleado</option>
+                  <option value="lluvia">Lluvia</option>
+                  <option value="viento">Viento</option>
+                  <option value="frio">Frío</option>
+                  <option value="calor">Calor</option>
+                </select>
+              </div>
+              <div>
+                <label>Hinchada (0–10)</label>
+                <input id="matchFans" type="number" min="0" max="10" value="5"/>
+              </div>
+              <div>
+                <label>Sponsors (0–5)</label>
+                <input id="matchSponsors" type="number" min="0" max="5" value="1"/>
+              </div>
+            </div>
+
+            <div>
+              <label>Notas de partido</label>
+              <textarea id="matchNotes" placeholder="Condiciones especiales, reglas caseras..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:space-between;margin-top:12px">
+        <div class="muted small">“Inicia siempre el visitante”. La posesión inicial será del equipo visitante.</div>
+        <div class="row">
+          <button class="secondary" id="btnValidate">Validar alineación</button>
+          <button id="btnSetup">Generar Setup</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="kpi">
+        <div class="box">
+          <div class="small muted">ATA total (modificado)</div>
+          <div id="kpiATK" class="n">0</div>
+        </div>
+        <div class="box">
+          <div class="small muted">DEF total (modificado)</div>
+          <div id="kpiDEF" class="n">0</div>
+        </div>
+        <div class="box">
+          <div class="small muted">Energía total</div>
+          <div id="kpiENG" class="n">0</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:0 0 8px 0;">📄 Resultado del Setup</h3>
+      <div id="setupOut" class="code small mono">Aún no generado.</div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:0 0 8px 0;">⚽ Acciones del Fútbol (base para motor de juego)</h3>
+      <div class="row">
+        <span class="pill">Penal</span>
+        <span class="pill">Tiro libre</span>
+        <span class="pill">Barrera</span>
+        <span class="pill">Saque lateral</span>
+        <span class="pill">Corner</span>
+        <span class="pill">Centro</span>
+        <span class="pill">Cabeceo</span>
+        <span class="pill">Volea</span>
+        <span class="pill">Frentazo</span>
+        <span class="pill">Mano</span>
+        <span class="pill">Patada</span>
+        <span class="pill">Codazo</span>
+        <span class="pill">Uno a uno</span>
+        <span class="pill">Mano a mano</span>
+        <span class="pill">Patea +distancia</span>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+/** =========================
+ *  Estado / almacenamiento
+ *  ========================= */
+const STORE_KEY = "cg_cards_v15";
+let cards = [];
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    cards = raw ? JSON.parse(raw) : [];
+  }catch(e){ cards = []; }
+}
+function saveStore(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(cards));
+}
+
+/** =========================
+ *  Utilidades
+ *  ========================= */
+function uid(){ return "C" + Math.random().toString(36).slice(2,10).toUpperCase(); }
+function byId(id){ return document.getElementById(id); }
+function option(text, value){ const o=document.createElement("option"); o.textContent=text; o.value=value; return o; }
+function fmt(n){ return Number(n).toFixed(0); }
+
+function rarityMultiplier(r){
+  switch(r){
+    case "legendaria": return 1.12;
+    case "rara": return 1.06;
+    default: return 1.0;
+  }
+}
+
+function strategyMods(strategy){
+  // Devuelve multiplicadores {atk, def}
+  switch(strategy){
+    case "attack": return {atk:1.12, def:0.96};
+    case "defense": return {atk:0.96, def:1.12};
+    case "counter": return {atk:1.05, def:1.02};
+    default: return {atk:1.0, def:1.0}; // balance
+  }
+}
+
+function weatherMods(weather){
+  // Ajustes simples, puedes afinar luego
+  switch(weather){
+    case "lluvia": return {atk:0.97, def:1.03, energy:0.98};
+    case "viento": return {atk:0.98, def:1.00, energy:0.99};
+    case "frio":  return {atk:0.99, def:1.01, energy:0.97};
+    case "calor": return {atk:1.01, def:0.99, energy:0.96};
+    default:      return {atk:1.00, def:1.00, energy:1.00}; // soleado
+  }
+}
+
+function fansMods(level){ // 0–10
+  const x = Math.max(0, Math.min(10, Number(level)));
+  // Hinchada influye más en local; en visitante es moral pero menor
+  return { atk: 1 + (x*0.005), def: 1 + (x*0.003) };
+}
+
+function stadiumMods(stadium){
+  switch(stadium){
+    case "local": return {atk:1.05, def:1.03};
+    case "visitante": return {atk:0.98, def:0.99};
+    default: return {atk:1.00, def:1.00};
+  }
+}
+
+function sponsorsMods(n){ // 0–5
+  const s = Math.max(0, Math.min(5, Number(n)));
+  // Sponsors mejoran instalaciones -> ligera mejora general
+  return { atk: 1 + s*0.006, def: 1 + s*0.008, energy: 1 + s*0.005 };
+}
+
+/** =========================
+ *  Render de cartas y selects
+ *  ========================= */
+function renderCards(){
+  const list = byId("cardsList");
+  list.innerHTML = "";
+  if(cards.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "muted small";
+    empty.textContent = "No tienes cartas aún. Crea algunas arriba.";
+    list.appendChild(empty);
+    fillTeamSelects(); // limpia selects
+    return;
+  }
+  cards.forEach(c=>{
+    const row = document.createElement("div");
+    row.className = "card-mini";
+    row.innerHTML = `
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <strong>${c.name}</strong>
+          <span class="badge">${c.role}</span>
+          <span class="badge">${c.rarity}</span>
+        </div>
+        <div class="small muted">ID: ${c.id}</div>
+      </div>
+      <div class="row small">
+        <span class="pill">ATA ${fmt(c.atk)}</span>
+        <span class="pill">DEF ${fmt(c.def)}</span>
+        <span class="pill">ENER ${fmt(c.energy)}</span>
+        ${c.cost?`<span class="pill">Costo ${fmt(c.cost)}</span>`:""}
+      </div>
+      ${c.notes?`<div class="small muted" style="margin-top:6px">${c.notes}</div>`:""}
+      <div class="row" style="margin-top:8px">
+        <button class="ghost" data-edit="${c.id}">Editar</button>
+        <button class="danger" data-del="${c.id}">Eliminar</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.getAttribute("data-del");
+      cards = cards.filter(c=>c.id!==id);
+      saveStore(); renderCards(); fillTeamSelects();
+    };
+  });
+  list.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.getAttribute("data-edit");
+      const c = cards.find(x=>x.id===id);
+      if(!c) return;
+      byId("c_name").value = c.name;
+      byId("c_role").value = c.role;
+      byId("c_atk").value = c.atk;
+      byId("c_def").value = c.def;
+      byId("c_energy").value = c.energy;
+      byId("c_rarity").value = c.rarity;
+      byId("c_cost").value = c.cost ?? 0;
+      byId("c_notes").value = c.notes ?? "";
+      byId("c_id").value = c.id;
+    };
+  });
+
+  fillTeamSelects();
+}
+
+function fillTeamSelects(){
+  const selGK  = byId("selGK");
+  const selDEF = byId("selDEF");
+  const selMED = byId("selMED");
+  const selDC  = byId("selDC");
+  const selSEC1= byId("selSEC1");
+  const selSEC2= byId("selSEC2");
+  [selGK, selDEF, selMED, selDC, selSEC1, selSEC2].forEach(sel=>{
+    sel.innerHTML = "";
+    sel.appendChild(option("— Seleccionar —",""));
+  });
+
+  cards.filter(c=>c.role==="GK").forEach(c=> selGK.appendChild(option(c.name+" ("+c.id+")", c.id)));
+  cards.filter(c=>c.role==="DEF").forEach(c=> selDEF.appendChild(option(c.name+" ("+c.id+")", c.id)));
+  cards.filter(c=>c.role==="MED").forEach(c=> selMED.appendChild(option(c.name+" ("+c.id+")", c.id)));
+  cards.filter(c=>c.role==="DC").forEach(c=> selDC.appendChild(option(c.name+" ("+c.id+")", c.id)));
+  cards.filter(c=>c.role==="SEC").forEach(c=>{
+    selSEC1.appendChild(option(c.name+" ("+c.id+")", c.id));
+    selSEC2.appendChild(option(c.name+" ("+c.id+")", c.id));
+  });
+}
+
+/** =========================
+ *  Crear/editar cartas
+ *  ========================= */
+function resetForm(){
+  byId("c_name").value = "";
+  byId("c_role").value = "GK";
+  byId("c_atk").value = 60;
+  byId("c_def").value = 60;
+  byId("c_energy").value = 50;
+  byId("c_rarity").value = "común";
+  byId("c_cost").value = 0;
+  byId("c_notes").value = "";
+  byId("c_id").value = "";
+}
+byId("btnResetForm").onclick = resetForm;
+
+byId("btnSave").onclick = ()=>{
+  const name = byId("c_name").value.trim();
+  if(!name){ alert("Ponle un nombre a la carta"); return; }
+  const role = byId("c_role").value;
+  const atk = Number(byId("c_atk").value);
+  const def = Number(byId("c_def").value);
+  const energy = Number(byId("c_energy").value);
+  const rarity = byId("c_rarity").value;
+  const cost = Number(byId("c_cost").value);
+  const notes = byId("c_notes").value.trim();
+  let id = byId("c_id").value.trim();
+
+  const data = { id: id || uid(), name, role, atk, def, energy, rarity, cost, notes };
+
+  if(id){ // update
+    const i = cards.findIndex(c=>c.id===id);
+    if(i>=0) cards[i] = data;
+  }else{ // create
+    cards.push(data);
+  }
+  saveStore(); renderCards(); resetForm();
+};
+
+/** =========================
+ *  Exportar / Importar
+ *  ========================= */
+byId("btnExport").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(cards,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "cartas.json"; a.click();
+  URL.revokeObjectURL(url);
+};
+byId("fileImport").onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const arr = JSON.parse(reader.result);
+      if(!Array.isArray(arr)) throw new Error("JSON inválido");
+      // merge simple por ID, reemplaza si existe
+      const map = new Map(cards.map(c=>[c.id,c]));
+      arr.forEach(c=> map.set(c.id||uid(), {...c, id:(c.id||uid())}));
+      cards = Array.from(map.values());
+      saveStore(); renderCards();
+      alert("Cartas importadas correctamente.");
+    }catch(err){
+      alert("Error al importar: "+err.message);
     }
-  </script>
+  };
+  reader.readAsText(file);
+};
+
+/** =========================
+ *  Validación y Setup
+ *  ========================= */
+function getCardById(id){ return cards.find(c=>c.id===id); }
+
+function selectedTeam(){
+  const ids = {
+    GK: byId("selGK").value,
+    DEF: byId("selDEF").value,
+    MED: byId("selMED").value,
+    DC: byId("selDC").value,
+    SEC1: byId("selSEC1").value,
+    SEC2: byId("selSEC2").value,
+  };
+  return {
+    core: ["GK","DEF","MED","DC"].map(k=> getCardById(ids[k])).filter(Boolean),
+    sec: ["SEC1","SEC2"].map(k=> getCardById(ids[k])).filter(Boolean),
+    ids
+  };
+}
+
+function validateLineup(showAlerts=true){
+  const {core, sec, ids} = selectedTeam();
+  // Reglas: 1 de cada core, 2 secundarias, sin repetidos
+  const uniq = new Set(Object.values(ids).filter(Boolean));
+  if(uniq.size !== Object.values(ids).filter(Boolean).length){
+    if(showAlerts) alert("No puedes repetir la misma carta en más de un slot.");
+    return false;
+  }
+  if(core.length !== 4){
+    if(showAlerts) alert("Debes seleccionar 1 GK, 1 DEF, 1 MED y 1 DC.");
+    return false;
+  }
+  if(sec.length !== 2){
+    if(showAlerts) alert("Debes seleccionar 2 cartas secundarias.");
+    return false;
+  }
+  return true;
+}
+
+byId("btnValidate").onclick = ()=> validateLineup(true) && alert("✅ Alineación válida");
+
+document.querySelectorAll("[data-clear]").forEach(btn=>{
+  btn.onclick = ()=>{
+    byId(btn.getAttribute("data-clear")).value = "";
+  };
+});
+
+function computeTeamPower(team, context){
+  // Suma base
+  let atk = 0, def = 0, energy = 0;
+  const all = [...team.core, ...team.sec];
+  all.forEach(c=>{
+    const r = rarityMultiplier(c.rarity);
+    atk += c.atk * r;
+    def += c.def * r;
+    energy += c.energy;
+  });
+
+  // Mods
+  const sm = strategyMods(context.strategy);
+  const wm = weatherMods(context.weather);
+  const fm = fansMods(context.fans);
+  const st = stadiumMods(context.stadium);
+  const sp = sponsorsMods(context.sponsors);
+
+  // Aplicar multiplicadores
+  let atkM = atk * sm.atk * wm.atk * fm.atk * st.atk * sp.atk;
+  let defM = def * sm.def * wm.def * fm.def * st.def * sp.def;
+  let engM = energy * wm.energy * sp.energy;
+
+  return {
+    base:{atk,def,energy},
+    mod:{atk:atkM, def:defM, energy:engM},
+    factors:{sm,wm,fm,st,sp}
+  };
+}
+
+byId("btnSetup").onclick = ()=>{
+  if(!validateLineup(true)) return;
+
+  const team = selectedTeam();
+  const ctx = {
+    strategy: byId("matchStrategy").value,
+    stadium: byId("matchStadium").value,
+    weather: byId("matchWeather").value,
+    fans: Number(byId("matchFans").value),
+    sponsors: Number(byId("matchSponsors").value),
+    notes: byId("matchNotes").value.trim()
+  };
+
+  // Visitante inicia siempre; distribuimos balón y energía
+  const all = [...team.core, ...team.sec];
+  const dist = all.map(c=>({
+    id:c.id, name:c.name, role:c.role,
+    energyGiven: Math.round(c.energy), // por ahora 1:1 con energy base (modificado en futuro)
+    hasBall: false
+  }));
+  // Posesión inicial aleatoria pero marcada como visitante
+  const who = Math.floor(Math.random()*dist.length);
+  dist[who].hasBall = true;
+
+  const power = computeTeamPower(team, ctx);
+
+  byId("kpiATK").textContent = fmt(power.mod.atk);
+  byId("kpiDEF").textContent = fmt(power.mod.def);
+  byId("kpiENG").textContent = fmt(power.mod.energy);
+
+  const out = {
+    reglas: {
+      basicas: "4 cartas (GK, DEF, MED, DC) + 2 secundarias",
+      iniciaVisitante: true
+    },
+    equipo:{
+      core: team.core.map(c=>({id:c.id,name:c.name,role:c.role,ATA:c.atk,DEF:c.def,ENER:c.energy,rare:c.rarity})),
+      secundarias: team.sec.map(c=>({id:c.id,name:c.name,role:c.role,ATA:c.atk,DEF:c.def,ENER:c.energy,rare:c.rarity}))
+    },
+    partido:{
+      estrategia: ctx.strategy,
+      estadio: ctx.stadium,
+      clima: ctx.weather,
+      hinchada: ctx.fans,
+      sponsors: ctx.sponsors,
+      notas: ctx.notes || null
+    },
+    distribucion:{
+      energiaPorJugador: dist.map(x=>({id:x.id,name:x.name,role:x.role,energia:x.energyGiven,balon:x.hasBall}))
+    },
+    poder: {
+      base: power.base,
+      modificado: power.mod,
+      detalleMultiplicadores: power.factors
+    },
+    accionesDisponibles:[
+      "penal","tiro_libre","barrera","saque_lateral","corner","centro","cabeceo","volea","frentazo",
+      "mano","patada","codazo","uno_a_uno","mano_a_mano","patea_mas_distancia"
+    ]
+  };
+
+  byId("setupOut").textContent = JSON.stringify(out,null,2);
+};
+
+/** =========================
+ *  Bootstrap
+ *  ========================= */
+loadStore();
+renderCards();
+</script>
 </body>
 </html>
