@@ -1,67 +1,38 @@
-function createCard(name, position, level, attack, defense, skill, discipline, training, character, energy) {
-  // Si no vienen parámetros, tomar los del formulario
-  if (!name) {
-    name = document.getElementById("name").value || "Jugador Anónimo";
-    position = document.getElementById("position").value;
-    level = parseInt(document.getElementById("level").value);
-    attack = parseInt(document.getElementById("attack").value);
-    defense = parseInt(document.getElementById("defense").value);
-    skill = parseInt(document.getElementById("skill").value);
-    discipline = parseInt(document.getElementById("discipline").value);
-    training = parseInt(document.getElementById("training").value);
-    character = parseInt(document.getElementById("character").value);
-    energy = parseInt(document.getElementById("energy").value);
-  }
-
-  const card = document.createElement("div");
-  card.className = "card";
-
-  card.innerHTML = `
-    <h3>${name}</h3>
-    <small>Posición: ${position} | Nivel: ${level}</small>
-    <div class="stats">
-      <div class="stat">⚡ Ataque: ${attack}</div>
-      <div class="stat">🛡️ Defensa: ${defense}</div>
-      <div class="stat">🎯 Habilidad: ${skill}</div>
-      <div class="stat">📏 Disciplina: ${discipline}</div>
-      <div class="stat">🏋️ Entrenamiento: ${training}</div>
-      <div class="stat">🔥 Carácter: ${character}</div>
-      <div class="stat">💧 Energía: ${energy}</div>
-    </div>
-  `;
-
-  document.getElementById("cardsContainer").appendChild(card);
+:root{
+  --bg:#0f1721; --panel:#0b1220; --card:#0f1726; --muted:#9aa3ad; --accent:#0ea5a4; --danger:#ef4444;
+  --glass: rgba(255,255,255,0.03);
 }
-
-// Generar colección automática
-function generateCollection() {
-  const collectionName = document.getElementById("collectionName").value || "Colección Sin Nombre";
-  const size = parseInt(document.getElementById("collectionSize").value) || 5;
-
-  alert(`Generando colección: ${collectionName} con ${size} cartas.`);
-
-  // Borra cartas anteriores
-  document.getElementById("cardsContainer").innerHTML = "";
-
-  // Nivel 1: siempre arranca con los 4 básicos
-  createCard("Portero Base", "GK", 1, 40, 60, 30, 50, 40, 50, 50);
-  createCard("Defensa Base", "DEF", 1, 50, 70, 35, 55, 45, 50, 50);
-  createCard("Mediocampista Base", "MED", 1, 55, 55, 45, 60, 50, 55, 50);
-  createCard("Delantero Base", "DC", 1, 70, 40, 50, 45, 55, 60, 50);
-
-  // Si hay más cartas, agregarlas aleatorias
-  for (let i = 4; i < size; i++) {
-    createCard(
-      "Jugador Random " + (i + 1),
-      ["GK", "DEF", "MED", "DC"][Math.floor(Math.random() * 4)],
-      Math.ceil(Math.random() * 3),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70),
-      30 + Math.floor(Math.random() * 70)
-    );
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:#e6eef6}
+header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:8px}
+header h1{margin:0;font-size:18px}
+.top-meta{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top-meta .top-actions{display:flex;gap:8px;align-items:center}
+button{background:var(--accent);color:#022;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+button.danger{background:var(--danger);color:white}
+.small-muted{font-size:12px;color:var(--muted)}
+.two-col{display:flex;gap:16px;padding:16px;align-items:flex-start}
+.panel-left{flex:0 0 460px;max-height:72vh;overflow:auto;padding-right:6px}
+.panel-right{flex:1;max-width:740px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+.compact-list{display:flex;flex-direction:column;gap:10px;padding:6px}
+.compact-item{background:var(--card);padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.03)}
+.compact-left{display:flex;flex-direction:column;gap:4px}
+.tag{font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted)}
+.small{font-size:12px}
+.mini-stats{display:flex;gap:8px;flex-wrap:wrap}
+.mini-stat{font-size:12px;color:var(--muted);padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.02)}
+.row{display:flex;gap:8px;align-items:center}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.grid-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+label{font-size:12px;color:var(--muted)}
+input,select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:#e6eef6}
+input[type="number"]{text-align:right}
+.divider{height:1px;background:rgba(255,255,255,0.02);margin:10px 0}
+.right{text-align:right}
+.panel-left h2{margin:0 0 6px 0}
+footer{padding:12px;text-align:center;color:var(--muted)}
+.danger{background:var(--danger)}
+@media (max-width:1000px){ .two-col{flex-direction:column} .panel-left{flex-basis:auto} .panel-right{max-width:100%} }
