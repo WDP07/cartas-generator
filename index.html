@@ -2,175 +2,73 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Generador de Cartas Futboleras</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eceff1;
-      text-align: center;
-      padding: 20px;
-    }
-    .carta {
-      width: 280px;
-      background: white;
-      border: 3px solid black;
-      border-radius: 15px;
-      margin: 10px auto;
-      padding: 10px;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
-    }
-    .categoria-Amateur { border-color: gray; }
-    .categoria-Profesional { border-color: blue; }
-    .categoria-Estrella { border-color: purple; }
-    .categoria-Leyenda { border-color: gold; }
-    .nombre { font-size: 20px; font-weight: bold; margin: 5px; }
-    .posicion { font-size: 14px; margin: 5px; }
-    .stats { margin-top: 10px; text-align: left; }
-    input, select { margin: 5px; padding: 5px; }
-  </style>
+  <title>Generador de Cartas</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🎴 Generador de Cartas Futboleras</h1>
+  <h1>⚽ Generador de Cartas de Fútbol</h1>
 
-  <h3>Crear Colección</h3>
-  <input id="nombreColeccion" type="text" placeholder="Nombre de la colección">
-  <input id="cantidadColeccion" type="number" placeholder="Cantidad de cartas">
-  <select id="nivel">
-    <option value="1">Nivel 1 - Básico</option>
-    <option value="2">Nivel 2 - Medio</option>
-    <option value="3">Nivel 3 - Manual</option>
-  </select>
-  <button onclick="iniciarColeccion()">Iniciar Colección</button>
+  <!-- Formulario de colección -->
+  <section class="form-section">
+    <h2>Crear Colección</h2>
+    <label>Nombre de la colección:</label>
+    <input type="text" id="collectionName" placeholder="Ej: Liga Estelar">
+    <label>Cantidad de cartas:</label>
+    <input type="number" id="collectionSize" min="1" value="5">
+    <button onclick="generateCollection()">Generar Colección</button>
+  </section>
 
-  <h3>Agregar Carta Manual (Nivel 3)</h3>
-  <input id="nombreJugador" type="text" placeholder="Nombre del jugador">
-  <select id="posicionJugador">
-    <option value="GK">GK</option>
-    <option value="DEF">DEF</option>
-    <option value="MED">MED</option>
-    <option value="DC">DC</option>
-  </select>
-  <select id="categoriaJugador">
-    <option value="Amateur">Amateur</option>
-    <option value="Profesional">Profesional</option>
-    <option value="Estrella">Estrella</option>
-    <option value="Leyenda">Leyenda</option>
-  </select>
-  <button onclick="crearJugadorManual()">Crear Jugador</button>
+  <!-- Formulario de carta -->
+  <section class="form-section">
+    <h2>Crear Carta Manual</h2>
+    <label>Nombre del jugador:</label>
+    <input type="text" id="name" placeholder="Ej: Juan Pérez">
 
-  <h2 id="progreso"></h2>
-  <div id="cartas"></div>
+    <label>Posición:</label>
+    <select id="position">
+      <option value="GK">GK - Arquero</option>
+      <option value="DEF">DEF - Defensa</option>
+      <option value="MED">MED - Mediocampo</option>
+      <option value="DC">DC - Delantero</option>
+    </select>
 
-  <script>
-    let coleccion = [];
-    let nombreColeccion = "";
-    let cantidadColeccion = 0;
+    <label>Nivel:</label>
+    <select id="level">
+      <option value="1">Nivel 1 - Básico</option>
+      <option value="2">Nivel 2 - Intermedio</option>
+      <option value="3">Nivel 3 - Elite</option>
+    </select>
 
-    const talentos = [
-      "Tiro potente", "Ataja penales", "Pase preciso", 
-      "Velocidad extra", "Líder nato", "Regate mágico"
-    ];
+    <label>Ataque:</label>
+    <input type="number" id="attack" min="1" value="50">
 
-    function rangoStats(categoria) {
-      switch(categoria) {
-        case "Amateur": return [20, 40];
-        case "Profesional": return [40, 70];
-        case "Estrella": return [70, 90];
-        case "Leyenda": return [90, 100];
-      }
-    }
+    <label>Defensa:</label>
+    <input type="number" id="defense" min="1" value="50">
 
-    function random(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+    <label>Habilidad:</label>
+    <input type="number" id="skill" min="1" value="50">
 
-    function crearJugador(nombre, posicion, categoria) {
-      const [min, max] = rangoStats(categoria);
-      return {
-        tipoCarta: "Jugador",
-        coleccion: nombreColeccion,
-        categoria: categoria,
-        posicion: posicion,
-        nombre: nombre,
-        ataque: random(min, max),
-        defensa: random(min, max),
-        energia: random(min, max),
-        experiencia: 0,
-        habilidad: random(min, max),
-        disciplina: random(min, max),
-        entrenamiento: random(min, max),
-        caracter: random(min, max),
-        velocidad: random(min, max),
-        resistencia: random(min, max),
-        moral: random(min, max),
-        popularidad: random(min, max),
-        talentoEspecial: talentos[random(0, talentos.length-1)]
-      };
-    }
+    <label>Disciplina:</label>
+    <input type="number" id="discipline" min="1" value="50">
 
-    function mostrarCarta(carta) {
-      const div = document.createElement("div");
-      div.className = `carta categoria-${carta.categoria}`;
-      div.innerHTML = `
-        <div class="nombre">${carta.nombre}</div>
-        <div class="posicion">Posición: ${carta.posicion}</div>
-        <div class="posicion">Categoría: ${carta.categoria}</div>
-        <div class="stats">
-          ⚔️ Ataque: ${carta.ataque}<br>
-          🛡️ Defensa: ${carta.defensa}<br>
-          🔋 Energía: ${carta.energia}<br>
-          ⭐ Experiencia: ${carta.experiencia}<br>
-          🎯 Habilidad: ${carta.habilidad}<br>
-          📏 Disciplina: ${carta.disciplina}<br>
-          🏋️ Entrenamiento: ${carta.entrenamiento}<br>
-          🔥 Carácter: ${carta.caracter}<br>
-          🏃 Velocidad: ${carta.velocidad}<br>
-          ⏳ Resistencia: ${carta.resistencia}<br>
-          💖 Moral: ${carta.moral}<br>
-          👥 Popularidad: ${carta.popularidad}<br>
-          ✨ Talento: ${carta.talentoEspecial}
-        </div>
-      `;
-      document.getElementById("cartas").appendChild(div);
-    }
+    <label>Entrenamiento:</label>
+    <input type="number" id="training" min="1" value="50">
 
-    function iniciarColeccion() {
-      coleccion = [];
-      document.getElementById("cartas").innerHTML = "";
-      nombreColeccion = document.getElementById("nombreColeccion").value;
-      cantidadColeccion = parseInt(document.getElementById("cantidadColeccion").value);
-      const nivel = parseInt(document.getElementById("nivel").value);
+    <label>Carácter:</label>
+    <input type="number" id="character" min="1" value="50">
 
-      if (nivel === 1) {
-        ["GK","DEF","MED","DC"].forEach(pos => {
-          const jugador = crearJugador(pos, pos, "Amateur");
-          coleccion.push(jugador);
-          mostrarCarta(jugador);
-        });
-      } else if (nivel === 2) {
-        ["GK","DEF","MED","DC"].forEach(pos => {
-          const jugador = crearJugador(pos, pos, "Profesional");
-          coleccion.push(jugador);
-          mostrarCarta(jugador);
-        });
-      }
-      actualizarProgreso();
-    }
+    <label>Energía:</label>
+    <input type="number" id="energy" min="1" value="50">
 
-    function crearJugadorManual() {
-      const nombre = document.getElementById("nombreJugador").value;
-      const posicion = document.getElementById("posicionJugador").value;
-      const categoria = document.getElementById("categoriaJugador").value;
-      const jugador = crearJugador(nombre, posicion, categoria);
-      coleccion.push(jugador);
-      mostrarCarta(jugador);
-      actualizarProgreso();
-    }
+    <button onclick="createCard()">Crear Carta</button>
+  </section>
 
-    function actualizarProgreso() {
-      document.getElementById("progreso").innerText =
-        `Colección "${nombreColeccion}": ${coleccion.length}/${cantidadColeccion} cartas creadas`;
-    }
-  </script>
+  <!-- Zona de cartas generadas -->
+  <section>
+    <h2>Cartas Generadas</h2>
+    <div id="cardsContainer" class="cards-container"></div>
+  </section>
+
+  <script src="script.js"></script>
 </body>
 </html>
