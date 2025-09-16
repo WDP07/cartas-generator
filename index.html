@@ -1,140 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cartas CRM - Generador</title>
+  <meta charset="UTF-8">
+  <title>Generador de Cartas</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>⚽ Cartas CRM - Generador & Editor</h1>
-    <div class="top-meta">
-      <div id="collectionInfo">Sin colección activa</div>
-      <div class="top-actions">
-        <button id="btnExport">Exportar JSON</button>
-        <input id="fileImport" type="file" accept=".json" style="display:none"/>
-        <button id="btnImport">Importar JSON</button>
-        <button id="btnClearStorage" title="Borra todo el localStorage">Reset</button>
-      </div>
+  <h1>Generador de Cartas - Proyecto</h1>
+  <div class="container">
+    <!-- Vista de cartas -->
+    <div class="cards-view">
+      <h2>Colección</h2>
+      <div id="cardsList" class="cards-list"></div>
     </div>
-  </header>
 
-  <main class="two-col">
-    <!-- IZQUIERDA: lista compacta -->
-    <aside class="panel-left">
-      <div class="left-head">
-        <h2>Cartas (vista compacta)</h2>
-        <div class="small-muted">Haz click en una tarjeta para editar.</div>
-      </div>
-      <div id="cardsList" class="compact-list"></div>
-    </aside>
+    <!-- Formulario -->
+    <div class="form-view">
+      <h2>Crear nueva carta</h2>
+      <form id="cardForm">
+        <label>Nombre:
+          <input type="text" id="name" required>
+        </label>
 
-    <!-- DERECHA: editor / CRM -->
-    <section class="panel-right">
-      <div class="card">
-        <h3>📦 Colección</h3>
-        <div class="row cols-3">
-          <label>Nombre</label>
-          <input id="collectionName" type="text" placeholder="Ej: Liga Estelar">
-          <label>Tamaño (cartas)</label>
-          <input id="collectionSize" type="number" min="1" value="20">
-          <label>Score total</label>
-          <input id="collectionScore" type="number" min="100" value="10000">
-        </div>
-        <div class="row gap">
-          <button id="btnNewCollection">Crear / Reiniciar colección</button>
-          <button id="btnAutoFill">Autollenar (según nivel seleccionado)</button>
-          <select id="autoLevel">
-            <option value="1">Nivel 1 (Básico)</option>
-            <option value="2">Nivel 2 (Intermedio)</option>
-            <option value="3">Nivel 3 (Elite)</option>
+        <label>Posición:
+          <select id="position">
+            <option value="GK">Arquero</option>
+            <option value="DEF">Defensa</option>
+            <option value="MED">Mediocampo</option>
+            <option value="DC">Delantero</option>
           </select>
-        </div>
-        <div class="divider"></div>
+        </label>
 
-        <h3>✏️ Editor de Carta</h3>
-        <div class="row cols-2">
-          <div>
-            <label>Tipo</label>
-            <select id="cardType">
-              <option value="Jugador">Jugador</option>
-              <option value="Objeto">Objeto</option>
-              <option value="Accesorio">Accesorio</option>
-              <option value="Poder">Poder</option>
-            </select>
-          </div>
-          <div>
-            <label>Posición (si es Jugador)</label>
-            <select id="position">
-              <option value="GK">GK</option>
-              <option value="DEF">DEF</option>
-              <option value="MED">MED</option>
-              <option value="DC">DC</option>
-              <option value="">—N/A—</option>
-            </select>
-          </div>
-        </div>
+        <label>Nivel:
+          <select id="level">
+            <option value="1">Nivel 1</option>
+            <option value="2">Nivel 2</option>
+            <option value="3">Nivel 3</option>
+          </select>
+        </label>
 
-        <div class="row cols-2">
-          <div>
-            <label>Nombre</label>
-            <input id="cardName" type="text" placeholder="Nombre carta...">
-          </div>
-          <div>
-            <label>Nivel</label>
-            <select id="level">
-              <option value="1">Nivel 1</option>
-              <option value="2">Nivel 2</option>
-              <option value="3">Nivel 3</option>
-            </select>
-          </div>
-        </div>
+        <label>Ataque:
+          <input type="number" id="attack" min="0" max="100" required>
+        </label>
 
-        <div id="statsInputs">
-          <div class="muted small">Atributos (sumados deben caber en el presupuesto del jugador)</div>
-          <div class="grid-stats">
-            <label>ATAQUE<input id="stat_atk" type="number" min="0" value="50"></label>
-            <label>DEFENSA<input id="stat_def" type="number" min="0" value="50"></label>
-            <label>HABILIDAD<input id="stat_skill" type="number" min="0" value="50"></label>
-            <label>DISCIPLINA<input id="stat_disc" type="number" min="0" value="50"></label>
-            <label>ENTRENAMIENTO<input id="stat_train" type="number" min="0" value="50"></label>
-            <label>CARÁCTER<input id="stat_char" type="number" min="0" value="50"></label>
-            <label>VELOCIDAD<input id="stat_spd" type="number" min="0" value="50"></label>
-            <label>RESISTENCIA<input id="stat_end" type="number" min="0" value="50"></label>
-            <label>MORAL<input id="stat_moral" type="number" min="0" value="50"></label>
-            <label>POPULARIDAD<input id="stat_pop" type="number" min="0" value="20"></label>
-            <label>ENERGÍA<input id="stat_energy" type="number" min="0" value="50"></label>
-          </div>
-        </div>
+        <label>Defensa:
+          <input type="number" id="defense" min="0" max="100" required>
+        </label>
 
-        <div class="row gap" style="margin-top:8px">
-          <div>
-            <button id="btnSaveCard">Guardar carta</button>
-            <button id="btnNew">Nuevo</button>
-            <button id="btnDeleteCard" class="danger">Eliminar</button>
-          </div>
-          <div class="muted small right">
-            <div>Budget jugador: <span id="playerBudget">-</span></div>
-            <div>Budget usado: <span id="budgetUsed">-</span></div>
-            <button id="btnAutoAdjust" class="ghost">Auto-ajustar atributos</button>
-          </div>
-        </div>
+        <label>Habilidad:
+          <input type="number" id="skill" min="0" max="100" required>
+        </label>
 
-        <div class="divider"></div>
+        <label>Disciplina:
+          <input type="number" id="discipline" min="0" max="100" required>
+        </label>
 
-        <h4>Reglas por rol / configuración</h4>
-        <div class="small-muted">
-          Factor niveles: Nivel1=0.8, Nivel2=1.0, Nivel3=1.2. <br>
-          1 stat = <strong id="statScaleLabel">10</strong> puntos de budget.
-        </div>
-      </div>
-    </section>
-  </main>
+        <label>Entrenamiento:
+          <input type="number" id="training" min="0" max="100" required>
+        </label>
 
-  <footer>
-    <small>Guardado local (localStorage). Exporta/Importa para backup.</small>
-  </footer>
+        <label>Carácter:
+          <input type="number" id="character" min="0" max="100" required>
+        </label>
+
+        <button type="submit">Agregar Carta</button>
+      </form>
+
+      <hr>
+
+      <h2>Gestión de colección</h2>
+      <button onclick="exportCards()">Exportar colección</button>
+      <input type="file" id="importFile" onchange="importCards(event)">
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
